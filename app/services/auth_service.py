@@ -14,13 +14,23 @@ class AuthService:
 
     def register(self, db: Session, request):
 
+        # Check if mobile already exists
+        existing_user = self.user_repository.get_by_mobile(
+            db,
+            request.mobile
+        )
+
+        if existing_user:
+            raise ValueError("Mobile number already registered.")
+
         user = User(
             full_name=request.full_name,
             password=hash_password(request.password),
             gender=request.gender,
             role_id=request.role_id,
             apartment_id=request.apartment_id,
-            status="ACTIVE"
+            status="ACTIVE",
+            mobile=request.mobile,
         )
 
         created_user = self.user_repository.create(db, user)

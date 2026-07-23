@@ -19,6 +19,8 @@ class User(Base):
 
     full_name = Column(String(100), nullable=False)
 
+    mobile = Column(String(15), unique=True, nullable=False, index=True)
+
     password = Column(String(255), nullable=False)
 
     gender = Column(

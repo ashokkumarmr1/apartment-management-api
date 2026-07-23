@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict
 # -----------------------------
 class UserRegister(BaseModel):
     full_name: str
+    mobile: str
     password: str
     gender: Optional[str] = None
     role_id: int
@@ -19,6 +20,7 @@ class UserRegister(BaseModel):
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     password: Optional[str] = None
+    mobile: Optional[str] = None
     gender: Optional[str] = None
     role_id: Optional[int] = None
     apartment_id: Optional[int] = None
