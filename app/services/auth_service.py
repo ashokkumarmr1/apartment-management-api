@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.core.security import hash_password, verify_password
+from app.core.security import hash_password, verify_password, create_access_token
 
 
 class AuthService:
@@ -50,4 +50,15 @@ class AuthService:
         ):
             raise ValueError("Invalid mobile or password.")
 
-        return user
+        token = create_access_token(
+            {
+                "sub": str(user.id),
+                "mobile": user.mobile,
+                "role_id": user.role_id
+            }
+        )
+
+        return {
+            "user": user,
+            "access_token": token
+        }

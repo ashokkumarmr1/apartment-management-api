@@ -55,17 +55,24 @@ def login(
     db: Session = Depends(get_db)
 ):
     try:
-        user = service.login(db, request)
+        result = service.login(db, request)
+
+        user = result["user"]
+        access_token = result["access_token"]
 
         return {
             "success": True,
             "message": "Login successful.",
             "data": {
-                "id": user.id,
-                "full_name": user.full_name,
-                "mobile": user.mobile,
-                "role_id": user.role_id,
-                "apartment_id": user.apartment_id
+                "access_token": access_token,
+                "token_type": "Bearer",
+                "user": {
+                    "id": user.id,
+                    "full_name": user.full_name,
+                    "mobile": user.mobile,
+                    "role_id": user.role_id,
+                    "apartment_id": user.apartment_id
+                }
             }
         }
 
