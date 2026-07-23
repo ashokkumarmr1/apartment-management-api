@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from starlette.responses import JSONResponse
 
 from app.core.dependencies import get_db
 from app.schemas.user import UserRegister
@@ -20,23 +21,32 @@ def register(
     try:
         user = service.register(db, request)
 
-        return {
-            "message": "User registered successfully",
-            "user": {
-                "id": user.id,
-                "full_name": user.full_name,
+        return JSONResponse(
+            status_code=201,
+            content={
+                "success": True,
+                "message": "User registered successfully.",
+                "data": {
+                    "id": user.id,
+                    "full_name": user.full_name,
+                    "mobile": user.mobile
+                }
             }
-        }
+        )
+
 
     except ValueError as e:
-        raise HTTPException(
+
+        return JSONResponse(
             status_code=400,
-            detail=str(e)
+            content={
+                "success": False,
+                "message": str(e),
+                "data": None
+            }
         )
 
 
     except Exception as e:
-
         print(e)
-
         raise
