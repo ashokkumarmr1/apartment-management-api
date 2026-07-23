@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 
 
 class AuthService:
@@ -33,3 +33,21 @@ class AuthService:
         )
 
         return self.user_repository.create(db, user)
+
+    def login(self, db: Session, request):
+
+        user = self.user_repository.get_by_mobile(
+            db,
+            request.mobile
+        )
+
+        if not user:
+            raise ValueError("Invalid mobile or password.")
+
+        if not verify_password(
+                request.password,
+                user.password
+        ):
+            raise ValueError("Invalid mobile or password.")
+
+        return user

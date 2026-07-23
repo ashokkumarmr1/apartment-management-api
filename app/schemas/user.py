@@ -4,6 +4,13 @@ from pydantic import BaseModel, ConfigDict
 
 
 # -----------------------------
+# Login Request
+# -----------------------------
+class UserLogin(BaseModel):
+    mobile: str
+    password: str
+
+# -----------------------------
 # Register Request
 # -----------------------------
 class UserRegister(BaseModel):

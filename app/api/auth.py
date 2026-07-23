@@ -5,13 +5,12 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from app.core.dependencies import get_db
-from app.schemas.user import UserRegister
+from app.schemas.user import UserRegister, UserLogin
 from app.services.auth_service import AuthService
 
 router = APIRouter()
 
 service = AuthService()
-
 
 @router.post("/register", status_code=201)
 def register(
@@ -36,7 +35,6 @@ def register(
 
 
     except ValueError as e:
-
         return JSONResponse(
             status_code=400,
             content={
@@ -50,3 +48,33 @@ def register(
     except Exception as e:
         print(e)
         raise
+
+@router.post("/login")
+def login(
+    request: UserLogin,
+    db: Session = Depends(get_db)
+):
+    try:
+        user = service.login(db, request)
+
+        return {
+            "success": True,
+            "message": "Login successful.",
+            "data": {
+                "id": user.id,
+                "full_name": user.full_name,
+                "mobile": user.mobile,
+                "role_id": user.role_id,
+                "apartment_id": user.apartment_id
+            }
+        }
+
+    except ValueError as e:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "success": False,
+                "message": str(e),
+                "data": None
+            }
+        )
