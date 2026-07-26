@@ -49,6 +49,16 @@ class UserResponse(BaseModel):
 
 
 # -----------------------------
+# Change Password Request
+# -----------------------------
+
+class ChangePasswordRequest(BaseModel):
+    mobile: str
+    old_password: str
+    new_password: str
+
+
+# -----------------------------
 # Common API Response
 # -----------------------------
 class ApiResponse(BaseModel):

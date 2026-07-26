@@ -12,6 +12,9 @@ class AuthService:
     def __init__(self):
         self.user_repository = UserRepository()
 
+    # ----------------------------------------------
+    # Register new User
+    # ----------------------------------------------
     def register(self, db: Session, request):
 
         existing_user = self.user_repository.get_by_mobile(
@@ -33,6 +36,10 @@ class AuthService:
         )
 
         return self.user_repository.create(db, user)
+
+    # ----------------------------------------------
+    # Login
+    # ----------------------------------------------
 
     def login(self, db: Session, request):
 
@@ -62,3 +69,34 @@ class AuthService:
             "user": user,
             "access_token": token
         }
+
+    # ----------------------------------------------
+    # Change Password
+    # ----------------------------------------------
+
+    def change_password(self, db, request):
+
+        user = self.user_repository.get_by_mobile(
+            db,
+            request.mobile
+        )
+
+        if not user:
+            raise ValueError("User not found.")
+
+        if not verify_password(
+                request.old_password,
+                user.password
+        ):
+            raise ValueError("Old password is incorrect.")
+
+        user.password = hash_password(
+            request.new_password
+        )
+
+        self.user_repository.update(
+            db,
+            user
+        )
+
+        return user

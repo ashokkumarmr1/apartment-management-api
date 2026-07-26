@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from app.core.dependencies import get_db
-from app.schemas.user import UserRegister, UserLogin
+from app.schemas.user import UserRegister, UserLogin, ChangePasswordRequest
 from app.services.auth_service import AuthService
 
 router = APIRouter()
@@ -79,6 +79,39 @@ def login(
     except ValueError as e:
         return JSONResponse(
             status_code=401,
+            content={
+                "success": False,
+                "message": str(e),
+                "data": None
+            }
+        )
+
+
+ # ----------------------------------------------
+    # Change Password API Service
+ # ----------------------------------------------
+@router.post("/change-password")
+def change_password(
+    request: ChangePasswordRequest,
+    db: Session = Depends(get_db)
+):
+    try:
+
+        service.change_password(
+            db,
+            request
+        )
+
+        return {
+            "success": True,
+            "message": "Password changed successfully.",
+            "data": None
+        }
+
+    except ValueError as e:
+
+        return JSONResponse(
+            status_code=400,
             content={
                 "success": False,
                 "message": str(e),
