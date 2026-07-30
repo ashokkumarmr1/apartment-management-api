@@ -1,71 +1,56 @@
 from sqlalchemy import (
-    Column,
-    BigInteger,
-    String,
-    Enum,
-    TIMESTAMP,
     ForeignKey,
-    func
+    String
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.database import Base
+from app.models.base import BaseModel
+from app.models.role import Role
+from app.models.apartment import Apartment
 
 
-class User(Base):
+class User(BaseModel):
     __tablename__ = "users"
 
-    id = Column(BigInteger, primary_key=True, index=True)
 
-    full_name = Column(String(100), nullable=False)
-
-    mobile = Column(String(15), unique=True, nullable=False, index=True)
-
-    password = Column(String(255), nullable=False)
-
-    gender = Column(
-        Enum("Male", "Female", "Other", name="gender_enum"),
-        nullable=True
-    )
-
-    role_id = Column(
-        BigInteger,
+    full_name: Mapped[str] = mapped_column(
+        String(100),
         nullable=False
     )
 
-    apartment_id = Column(
-        BigInteger,
+    email: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
         nullable=False
     )
 
-    status = Column(
-        Enum(
-            "ACTIVE",
-            "INACTIVE",
-            "BLOCKED",
-            "PENDING",
-            name="user_status_enum"
-        ),
-        default="ACTIVE",
-        nullable=True
+    mobile: Mapped[str] = mapped_column(
+        String(20),
+        unique=True,
+        nullable=False
     )
 
-    created_at = Column(
-        TIMESTAMP,
-        server_default=func.current_timestamp()
+    password_hash: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
     )
 
-    updated_at = Column(
-        TIMESTAMP,
-        server_default=func.current_timestamp(),
-        onupdate=func.current_timestamp()
+    role_id: Mapped[int] = mapped_column(
+        ForeignKey("roles.id"),
+        nullable=False
     )
 
-    deleted_at = Column(
-        TIMESTAMP,
-        nullable=True
+    apartment_id: Mapped[int] = mapped_column(
+        ForeignKey("apartments.id"),
+        nullable=False
     )
 
-    # Relationships
-   # role = relationship("Role", back_populates="users")
-   # apartment = relationship("Apartment", back_populates="users")
+    role: Mapped["Role"] = relationship(
+        "Role",
+        back_populates="users"
+    )
+
+    apartment: Mapped["Apartment"] = relationship(
+        "Apartment",
+        back_populates="users"
+    )

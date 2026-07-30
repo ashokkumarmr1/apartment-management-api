@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-
-from app.api.auth import router as auth_router
+from app.core.init_db import create_database, create_tables
 
 app = FastAPI(
     title="Apartment Management API",
@@ -8,8 +7,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.include_router(auth_router)
 
+
+@app.on_event("startup")
+def startup():
+    create_database()
+    create_tables()
 
 @app.get("/")
 def root():
