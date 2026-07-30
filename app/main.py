@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.core.init_db import create_database, create_tables
+from app.core.init_db import InitDB
 
 app = FastAPI(
     title="Apartment Management API",
@@ -11,8 +11,7 @@ app = FastAPI(
 
 @app.on_event("startup")
 def startup():
-    create_database()
-    create_tables()
+    InitDB.initialize()
 
 @app.get("/")
 def root():

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import (
     ForeignKey,
     String
@@ -5,8 +7,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import BaseModel
-from app.models.role import Role
-from app.models.apartment import Apartment
 
 
 class User(BaseModel):
