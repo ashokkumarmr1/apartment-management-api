@@ -1,15 +1,22 @@
 from sqlalchemy.orm import Session
+
 from app.models.role import Role
+from app.repositories.base_repository import BaseRepository
 
-class RoleRepository:
 
-    @staticmethod
-    def get_by_code(db: Session, code: str):
-        return db.query(Role).filter(Role.code == code).first()
+class RoleRepository(BaseRepository[Role]):
 
-    @staticmethod
-    def create(db: Session, role: Role):
-        db.add(role)
-        db.commit()
-        db.refresh(role)
-        return role
+    def __init__(self):
+        super().__init__(Role)
+
+    def get_by_code(
+        self,
+        db: Session,
+        code: str,
+    ) -> Role | None:
+
+        return (
+            db.query(Role)
+            .filter(Role.code == code)
+            .first()
+        )

@@ -15,22 +15,27 @@ class RoleService:
         ("Maintenance", "MAINTENANCE"),
     ]
 
+    role_repository = RoleRepository()
+
     @staticmethod
     def seed_roles(db: Session):
 
         for name, code in RoleService.DEFAULT_ROLES:
 
-            role = RoleRepository.get_by_code(db, code)
+            role = RoleService.role_repository.get_by_code(
+                db,
+                code,
+            )
 
             if role:
                 continue
 
-            RoleRepository.create(
+            RoleService.role_repository.create(
                 db,
                 Role(
                     name=name,
-                    code=code
-                )
+                    code=code,
+                ),
             )
 
         print("Default Roles Ready")

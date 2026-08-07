@@ -1,7 +1,11 @@
 # app/core/security.py
 
+from jose import jwt
+
 from datetime import datetime, timedelta, UTC
-from jose import JWTError, jwt
+
+import jwt
+from jwt import ExpiredSignatureError, InvalidTokenError
 from pwdlib import PasswordHash
 
 from app.core.config import settings
@@ -9,59 +13,71 @@ from app.core.config import settings
 password_hash = PasswordHash.recommended()
 
 
-# -------------------------
-# Hash Password
-# -------------------------
-def hash_password(password: str) -> str:
-    return password_hash.hash(password)
+class Security:
 
+    @staticmethod
+    def hash_password(password: str) -> str:
+        try:
+            return password_hash.hash(password)
+        except Exception as ex:
+            raise RuntimeError("Failed to hash password.") from ex
 
-# -------------------------
-# Verify Password
-# -------------------------
-def verify_password(password: str, hashed: str) -> bool:
-    return password_hash.verify(password, hashed)
+    @staticmethod
+    def verify_password(
+        plain_password: str,
+        hashed_password: str
+    ) -> bool:
+        try:
+            return password_hash.verify(
+                plain_password,
+                hashed_password,
+            )
+        except Exception as ex:
+            raise RuntimeError("Failed to verify password.") from ex
 
+    @staticmethod
+    def create_access_token(
+        data: dict,
+        expires_delta: timedelta | None = None,
+    ) -> str:
+        try:
+            payload = data.copy()
 
-# -------------------------
-# Create JWT Token
-# -------------------------
-def create_access_token(data: dict) -> str:
-    """
-    Create JWT token.
-    """
+            expire = (
+                datetime.now(UTC)
+                + (
+                    expires_delta
+                    or timedelta(
+                        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+                    )
+                )
+            )
 
-    to_encode = data.copy()
+            payload["exp"] = expire
 
-    expire = datetime.now(UTC) + timedelta(
-        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
+            return jwt.encode(
+                payload,
+                settings.SECRET_KEY,
+                algorithm=settings.ALGORITHM,
+            )
 
-    to_encode.update({"exp": expire})
+        except Exception as ex:
+            raise RuntimeError("Failed to create access token.") from ex
 
-    return jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
-    )
+    @staticmethod
+    def decode_access_token(token: str) -> dict:
+        try:
+            return jwt.decode(
+                token,
+                settings.SECRET_KEY,
+                algorithms=[settings.ALGORITHM],
+            )
 
+        except ExpiredSignatureError as ex:
+            raise ValueError("Access token has expired.") from ex
 
-# -------------------------
-# Decode JWT Token
-# -------------------------
-def decode_access_token(token: str):
-    """
-    Verify and decode JWT token.
-    """
+        except InvalidTokenError as ex:
+            raise ValueError("Invalid access token.") from ex
 
-    try:
-        payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
-        )
-
-        return payload
-
-    except JWTError:
-        return None
+        except Exception as ex:
+            raise RuntimeError("Failed to decode access token.") from ex

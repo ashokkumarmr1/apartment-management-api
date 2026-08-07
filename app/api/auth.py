@@ -1,120 +1,93 @@
 # app/api/auth.py
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from starlette.responses import JSONResponse
 
-from app.core.dependencies import get_db
-from app.schemas.user import UserRegister, UserLogin, ChangePasswordRequest
+from app.core.dependencies import get_db, get_current_user
+from app.core.responses import ApiResponse
+from app.models.user import User
+from app.schemas.user import (
+    ChangePasswordRequest,
+    UserLogin
+)
 from app.services.auth_service import AuthService
+from app.schemas.auth import RegisterRequest
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/auth",
+    tags=["Authentication"],
+)
 
 service = AuthService()
 
+
 @router.post("/register", status_code=201)
 def register(
-    request: UserRegister,
-    db: Session = Depends(get_db)
+    request: RegisterRequest,
+    db: Session = Depends(get_db),
 ):
-    try:
-        user = service.register(db, request)
+    user = service.register(db, request)
 
-        return JSONResponse(
-            status_code=201,
-            content={
-                "success": True,
-                "message": "User registered successfully.",
-                "data": {
-                    "id": user.id,
-                    "full_name": user.full_name,
-                    "mobile": user.mobile
-                }
-            }
-        )
+    return ApiResponse.success(
+        message="User registered successfully.",
+        status_code=201,
+        data={
+            "id": user.id,
+            "full_name": user.full_name,
+            "mobile": user.mobile,
+        },
+    )
 
-
-    except ValueError as e:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "success": False,
-                "message": str(e),
-                "data": None
-            }
-        )
-
-
-    except Exception as e:
-        print(e)
-        raise
 
 @router.post("/login")
 def login(
     request: UserLogin,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    try:
-        result = service.login(db, request)
+    result = service.login(db, request)
 
-        user = result["user"]
-        access_token = result["access_token"]
+    user = result["user"]
 
-        return {
-            "success": True,
-            "message": "Login successful.",
-            "data": {
-                "access_token": access_token,
-                "token_type": "Bearer",
-                "user": {
-                    "id": user.id,
-                    "full_name": user.full_name,
-                    "mobile": user.mobile,
-                    "role_id": user.role_id,
-                    "apartment_id": user.apartment_id
-                }
-            }
-        }
-
-    except ValueError as e:
-        return JSONResponse(
-            status_code=401,
-            content={
-                "success": False,
-                "message": str(e),
-                "data": None
-            }
-        )
+    return ApiResponse.success(
+        message="Login successful.",
+        data={
+            "access_token": result["access_token"],
+            "token_type": "Bearer",
+            "user": {
+                "id": user.id,
+                "full_name": user.full_name,
+                "mobile": user.mobile,
+                "role_id": user.role_id,
+                "apartment_id": user.apartment_id,
+            },
+        },
+    )
 
 
- # ----------------------------------------------
-    # Change Password API Service
- # ----------------------------------------------
 @router.post("/change-password")
 def change_password(
     request: ChangePasswordRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    try:
+    service.change_password(db, request)
 
-        service.change_password(
-            db,
-            request
-        )
+    return ApiResponse.success(
+        message="Password changed successfully.",
+    )
 
-        return {
-            "success": True,
-            "message": "Password changed successfully.",
-            "data": None
-        }
-
-    except ValueError as e:
-
-        return JSONResponse(
-            status_code=400,
-            content={
-                "success": False,
-                "message": str(e),
-                "data": None
-            }
-        )
+@router.get("/me")
+def get_me(
+    current_user: User = Depends(get_current_user),
+):
+    return {
+        "success": True,
+        "message": "User details fetched successfully.",
+        "data": {
+            "id": current_user.id,
+            "full_name": current_user.full_name,
+            "email": current_user.email,
+            "mobile": current_user.mobile,
+            "role_id": current_user.role_id,
+            "apartment_id": current_user.apartment_id,
+        },
+    }
