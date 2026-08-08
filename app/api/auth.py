@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db, get_current_user
 from app.core.responses import ApiResponse
+from app.models import PasswordOTP
 from app.models.user import User
 from app.schemas.user import (
     ChangePasswordRequest,
@@ -13,9 +14,18 @@ from app.schemas.user import (
 from app.services.auth_service import AuthService
 from app.schemas.auth import RegisterRequest
 
+from app.schemas.auth import ForgotPasswordRequest
+from app.services.otp_service import OTPService
+
 from app.core.dependencies import (
     get_db,
     get_current_user,
+)
+
+from app.schemas.auth import (
+    ForgotPasswordRequest,
+    VerifyOTPRequest,
+    ResetPasswordRequest,
 )
 
 router = APIRouter(
@@ -24,6 +34,7 @@ router = APIRouter(
 )
 
 service = AuthService()
+otp_service = OTPService()
 
 
 @router.post("/register", status_code=201)
@@ -108,3 +119,78 @@ def get_me(
             "apartment_id": current_user.apartment_id,
         },
     }
+
+@router.post("/forgot-password")
+def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+
+        otp = otp_service.request_password_reset(
+            db,
+            request.mobile,
+        )
+
+        return {
+            "success": True,
+            "message": "OTP generated successfully.",
+            "data": {
+                "otp": otp.otp,
+                "expires_at": otp.expires_at,
+            },
+        }
+
+    except ValueError as e:
+
+        return {
+            "success": False,
+            "message": str(e),
+            "data": None,
+        }
+
+def verify_password_reset_otp(
+    self,
+    db: Session,
+    mobile: str,
+    otp: str,
+) -> PasswordOTP:
+
+    user = self.user_repository.get_by_mobile(
+        db,
+        mobile,
+    )
+
+    if user is None:
+        raise ValueError("User not found.")
+
+    return self.verify_password_otp(
+        db,
+        user.id,
+        otp,
+    )
+
+@router.post("/reset-password")
+def reset_password(
+    request: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        otp_service.reset_password(
+            db,
+            request.mobile,
+            request.new_password,
+        )
+
+        return {
+            "success": True,
+            "message": "Password reset successfully.",
+            "data": None,
+        }
+
+    except ValueError as e:
+        return {
+            "success": False,
+            "message": str(e),
+            "data": None,
+        }

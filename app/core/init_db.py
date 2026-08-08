@@ -10,6 +10,8 @@ from app.models.role import Role
 from app.models.apartment import Apartment
 from app.models.user import User
 
+from app.models import User, Role, Apartment, PasswordOTP
+
 
 server_engine = create_engine(
     f"mysql+pymysql://{settings.DB_USER}:{settings.DB_PASSWORD}"

@@ -7,6 +7,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import BaseModel
+from app.models.otp import PasswordOTP
 
 
 class User(BaseModel):
@@ -53,4 +54,9 @@ class User(BaseModel):
     apartment: Mapped["Apartment"] = relationship(
         "Apartment",
         back_populates="users"
+    )
+
+    password_otps: Mapped[list["PasswordOTP"]] = relationship(
+        "PasswordOTP",
+        back_populates="user",
     )

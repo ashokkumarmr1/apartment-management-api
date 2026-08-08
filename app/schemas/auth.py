@@ -26,3 +26,35 @@ class RegisterResponse(BaseModel):
     full_name: str
     email: EmailStr
     mobile: str
+
+class ForgotPasswordRequest(BaseModel):
+    mobile: str = Field(
+        ...,
+        min_length=10,
+        max_length=15,
+    )
+
+class VerifyOTPRequest(BaseModel):
+    mobile: str = Field(
+        ...,
+        min_length=10,
+        max_length=15,
+    )
+
+    otp: str = Field(
+        ...,
+        min_length=6,
+        max_length=6,
+    )
+
+class ResetPasswordRequest(BaseModel):
+    mobile: str = Field(
+        ...,
+        min_length=10,
+        max_length=15,
+    )
+
+    new_password: str = Field(
+        ...,
+        min_length=8,
+    )
