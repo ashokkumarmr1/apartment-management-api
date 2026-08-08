@@ -53,7 +53,6 @@ class UserResponse(BaseModel):
 # -----------------------------
 
 class ChangePasswordRequest(BaseModel):
-    mobile: str
     old_password: str
     new_password: str
 

@@ -13,6 +13,11 @@ from app.schemas.user import (
 from app.services.auth_service import AuthService
 from app.schemas.auth import RegisterRequest
 
+from app.core.dependencies import (
+    get_db,
+    get_current_user,
+)
+
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
@@ -67,13 +72,25 @@ def login(
 @router.post("/change-password")
 def change_password(
     request: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    service.change_password(db, request)
+    try:
+        service.change_password(
+            db,
+            current_user,
+            request,
+        )
 
-    return ApiResponse.success(
-        message="Password changed successfully.",
-    )
+        return ApiResponse.success(
+            message="Password changed successfully.",
+        )
+
+    except ValueError as e:
+        return ApiResponse.error(
+            message=str(e),
+            status_code=400,
+        )
 
 @router.get("/me")
 def get_me(

@@ -9,7 +9,7 @@ from app.repositories.role_repository import RoleRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import RegisterRequest
 from app.utils.constants import Roles
-from app.schemas.user import UserLogin
+from app.schemas.user import UserLogin, ChangePasswordRequest
 
 
 class AuthService:
@@ -100,3 +100,36 @@ class AuthService:
             "user": user,
             "access_token": access_token,
         }
+
+    def change_password(
+            self,
+            db: Session,
+            user: User,
+            request: ChangePasswordRequest,
+    ):
+        # Verify old password
+        if not Security.verify_password(
+                request.old_password,
+                user.password_hash,
+        ):
+            raise ValueError("Old password is incorrect.")
+
+        # Prevent same password
+        if Security.verify_password(
+                request.new_password,
+                user.password_hash,
+        ):
+            raise ValueError(
+                "New password must be different from old password."
+            )
+
+        # Hash new password
+        user.password_hash = Security.hash_password(
+            request.new_password
+        )
+
+        # Update user
+        return self.user_repository.update(
+            db,
+            user,
+        )
