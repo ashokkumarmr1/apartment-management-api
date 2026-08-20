@@ -40,3 +40,18 @@ class SubscriptionRepository(
             )
             .first()
         )
+
+    def get_by_id_and_apartment(
+            self,
+            db: Session,
+            subscription_id: int,
+            apartment_id: int,
+    ):
+        return (
+            db.query(self.model)
+            .filter(
+                self.model.id == subscription_id,
+                self.model.apartment_id == apartment_id,
+            )
+            .first()
+        )

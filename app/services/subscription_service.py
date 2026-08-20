@@ -1,8 +1,5 @@
-from datetime import datetime, timedelta, UTC
-from decimal import Decimal
-
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-
 from app.models.subscription import Subscription
 from app.repositories.subscription_repository import SubscriptionRepository
 from app.repositories.subscription_plan_repository import (
@@ -53,7 +50,7 @@ class SubscriptionService:
                 "Apartment already has an active subscription."
             )
 
-        start_date = datetime.now(UTC)
+        start_date = datetime.utcnow()
 
         end_date = (
             start_date
@@ -94,7 +91,7 @@ class SubscriptionService:
             return None
 
         # Automatically expire subscription
-        if subscription.end_date <= datetime.now(UTC):
+        if subscription.end_date <= datetime.utcnow():
 
             subscription.status = "EXPIRED"
 
@@ -121,25 +118,87 @@ class SubscriptionService:
         return subscription is not None
 
     def cancel_subscription(
-        self,
-        db: Session,
-        apartment_id: int,
-    ):
+            self,
+            db: Session,
+            subscription_id: int,
+            apartment_id: int,
+    ) -> Subscription:
 
         subscription = (
             self.subscription_repository
-            .get_active_by_apartment(
+            .get_by_id_and_apartment(
                 db,
+                subscription_id,
                 apartment_id,
             )
         )
 
         if subscription is None:
             raise ValueError(
-                "No active subscription found."
+                "Subscription not found."
+            )
+
+        if subscription.status != "ACTIVE":
+            raise ValueError(
+                "Only active subscriptions can be cancelled."
             )
 
         subscription.status = "CANCELLED"
+
+        return self.subscription_repository.update(
+            db,
+            subscription,
+        )
+
+    def update_subscription(
+            self,
+            db: Session,
+            subscription_id: int,
+            apartment_id: int,
+            plan_code: str,
+    ) -> Subscription:
+
+        subscription = (
+            self.subscription_repository
+            .get_by_id_and_apartment(
+                db,
+                subscription_id,
+                apartment_id,
+            )
+        )
+
+        if subscription is None:
+            raise ValueError(
+                "Subscription not found."
+            )
+
+        if subscription.status != "ACTIVE":
+            raise ValueError(
+                "Only active subscriptions can be updated."
+            )
+
+        plan = self.plan_repository.get_by_code(
+            db,
+            plan_code,
+        )
+
+        if plan is None:
+            raise ValueError(
+                "Subscription plan not found."
+            )
+
+        if not plan.is_active:
+            raise ValueError(
+                "Subscription plan is inactive."
+            )
+
+        subscription.plan_id = plan.id
+        subscription.amount = plan.price
+
+        subscription.end_date = (
+                subscription.start_date
+                + timedelta(days=plan.duration_days)
+        )
 
         return self.subscription_repository.update(
             db,

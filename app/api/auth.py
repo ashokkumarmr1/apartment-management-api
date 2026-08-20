@@ -16,6 +16,7 @@ from app.schemas.auth import RegisterRequest
 
 from app.schemas.auth import ForgotPasswordRequest
 from app.services.otp_service import OTPService
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.dependencies import (
     get_db,
@@ -60,24 +61,31 @@ def login(
     request: UserLogin,
     db: Session = Depends(get_db),
 ):
-    result = service.login(db, request)
+    try:
+        result = service.login(db, request)
 
-    user = result["user"]
+        user = result["user"]
 
-    return ApiResponse.success(
-        message="Login successful.",
-        data={
-            "access_token": result["access_token"],
-            "token_type": "Bearer",
-            "user": {
-                "id": user.id,
-                "full_name": user.full_name,
-                "mobile": user.mobile,
-                "role_id": user.role_id,
-                "apartment_id": user.apartment_id,
+        return ApiResponse.success(
+            message="Login successful.",
+            data={
+                "access_token": result["access_token"],
+                "token_type": "Bearer",
+                "user": {
+                    "id": user.id,
+                    "full_name": user.full_name,
+                    "mobile": user.mobile,
+                    "role_id": user.role_id,
+                    "apartment_id": user.apartment_id,
+                },
             },
-        },
-    )
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=401,
+            detail=str(e),
+        )
 
 
 @router.post("/change-password")
