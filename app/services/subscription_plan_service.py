@@ -76,3 +76,43 @@ class SubscriptionPlanService:
             )
 
         print("Default Subscription Plans Ready")
+
+    def get_active_plans(
+        self,
+        db: Session,
+    ) -> list[SubscriptionPlan]:
+
+        return self.repository.get_all_active(db)
+
+    def get_all_plans(
+        self,
+        db: Session,
+        active_only: bool = True,
+    ) -> list[SubscriptionPlan]:
+
+        return self.repository.get_all_plans(
+            db,
+            active_only,
+        )
+
+    def get_plan_by_id(
+        self,
+        db: Session,
+        plan_id: int,
+    ) -> SubscriptionPlan | None:
+
+        return self.repository.get_by_id(
+            db,
+            plan_id,
+        )
+
+    def get_plan_by_code(
+        self,
+        db: Session,
+        code: str,
+    ) -> SubscriptionPlan | None:
+
+        return self.repository.get_by_code(
+            db,
+            code,
+        )
