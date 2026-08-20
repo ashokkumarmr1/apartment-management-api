@@ -3,6 +3,7 @@ from app.core.init_db import InitDB
 from app.api.auth import router as auth_router
 
 from app.api.subscription import router as subscription_router
+from app.api.subscription_plan import router as subscription_plan_router
 
 app = FastAPI(
     title="Apartment Management API",
@@ -21,6 +22,8 @@ def startup():
 app.include_router(auth_router)
 
 app.include_router(subscription_router)
+
+app.include_router(subscription_plan_router)
 
 @app.get("/")
 def root():

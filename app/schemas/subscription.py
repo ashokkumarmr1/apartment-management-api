@@ -5,7 +5,10 @@ from pydantic import BaseModel, ConfigDict
 
 
 class CreateSubscriptionRequest(BaseModel):
-    apartment_id: int
+    plan_code: str
+
+
+class UpdateSubscriptionRequest(BaseModel):
     plan_code: str
 
 
@@ -18,4 +21,6 @@ class SubscriptionResponse(BaseModel):
     amount: Decimal
     status: str
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
