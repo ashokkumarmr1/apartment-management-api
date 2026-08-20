@@ -5,6 +5,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.subscription import Subscription
+    from app.models.visitor import Visitor
+
+if TYPE_CHECKING:
+    from app.models.subscription import Subscription
 
 
 class Apartment(BaseModel):
@@ -17,4 +21,5 @@ class Apartment(BaseModel):
     # Relationship back to User
     users: Mapped[list["User"]] = relationship("User", back_populates="apartment")
     subscriptions: Mapped[list["Subscription"]] = relationship("Subscription",back_populates="apartment")
+    visitors: Mapped[list["Visitor"]] = relationship("Visitor",back_populates="apartment")
 
