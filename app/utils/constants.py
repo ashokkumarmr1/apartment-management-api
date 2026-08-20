@@ -5,3 +5,9 @@ class Roles:
     TENANT = "TENANT"
     SECURITY = "SECURITY"
     MAINTENANCE = "MAINTENANCE"
+
+class SubscriptionPlans:
+    TRIAL = "TRIAL"
+    BASIC = "BASIC"
+    STANDARD = "STANDARD"
+    PREMIUM = "PREMIUM"

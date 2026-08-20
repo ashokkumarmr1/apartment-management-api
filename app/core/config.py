@@ -9,9 +9,14 @@ class Settings(BaseSettings):
     DB_NAME: str
     DB_USER: str
     DB_PASSWORD: str
+
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+
+    # Email / SMTP
+    SENDGRID_API_KEY: str
+    SENDGRID_FROM_EMAIL: str
 
     @property
     def DATABASE_URL(self) -> str:

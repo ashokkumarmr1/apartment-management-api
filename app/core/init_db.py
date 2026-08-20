@@ -6,11 +6,18 @@ from app.models.base import Base
 
 from app.services.role_service import RoleService
 
-from app.models.role import Role
-from app.models.apartment import Apartment
-from app.models.user import User
-
 from app.models import User, Role, Apartment, PasswordOTP
+from app.services.subscription_plan_service import (
+    SubscriptionPlanService,
+)
+from app.models import (
+    User,
+    Role,
+    Apartment,
+    PasswordOTP,
+    SubscriptionPlan,
+    Subscription,
+)
 
 
 server_engine = create_engine(
@@ -48,6 +55,9 @@ class InitDB:
 
         try:
             RoleService.seed_roles(db)
+            subscription_plan_service = SubscriptionPlanService()
+            subscription_plan_service.seed_plans(db)
+
         finally:
             db.close()
 

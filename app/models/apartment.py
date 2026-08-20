@@ -1,6 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String
 from app.models.base import BaseModel
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.subscription import Subscription
 
 
 class Apartment(BaseModel):
@@ -12,4 +16,5 @@ class Apartment(BaseModel):
 
     # Relationship back to User
     users: Mapped[list["User"]] = relationship("User", back_populates="apartment")
+    subscriptions: Mapped[list["Subscription"]] = relationship("Subscription",back_populates="apartment")
 

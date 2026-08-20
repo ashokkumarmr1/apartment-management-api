@@ -8,6 +8,8 @@ from app.models.otp import PasswordOTP
 from app.repositories.otp_repository import OTPRepository
 from app.repositories.user_repository import UserRepository
 
+from app.services.email_service import EmailService
+
 
 class OTPService:
 
@@ -95,10 +97,17 @@ class OTPService:
                 "User not found."
             )
 
-        return self.create_password_otp(
+        otp = self.create_password_otp(
             db,
             user.id,
         )
+
+        EmailService.send_otp(
+            user.email,
+            otp.otp,
+        )
+
+        return otp
 
     def verify_password_reset_otp(
             self,
