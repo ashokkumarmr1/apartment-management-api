@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
-
+# todo
+# dont include space in import area
 
 class CreateVisitorRequest(BaseModel):
     visitor_name: str

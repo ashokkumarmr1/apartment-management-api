@@ -1,5 +1,6 @@
 from decimal import Decimal
-
+# todo
+# dont include space in import area
 from pydantic import BaseModel, ConfigDict
 
 

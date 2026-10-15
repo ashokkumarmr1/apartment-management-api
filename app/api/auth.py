@@ -37,7 +37,7 @@ router = APIRouter(
 service = AuthService()
 otp_service = OTPService()
 
-
+# todo avoid spacing try to put it in single line once line reached then we can put it in next line untill no for all file
 @router.post("/register", status_code=201)
 def register(
     request: RegisterRequest,

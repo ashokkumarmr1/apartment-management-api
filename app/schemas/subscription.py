@@ -2,7 +2,8 @@ from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
-
+# todo
+# dont include space in import area
 
 class CreateSubscriptionRequest(BaseModel):
     plan_code: str

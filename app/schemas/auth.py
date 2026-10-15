@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
-
+# todo
+# each class leave 2 space and put it in single line
 
 class RegisterRequest(BaseModel):
     full_name: str = Field(..., min_length=3, max_length=100)
@@ -26,6 +27,7 @@ class RegisterResponse(BaseModel):
     full_name: str
     email: EmailStr
     mobile: str
+
 
 class ForgotPasswordRequest(BaseModel):
     mobile: str = Field(

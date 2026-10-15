@@ -11,7 +11,8 @@ from app.schemas.auth import RegisterRequest
 from app.utils.constants import Roles
 from app.schemas.user import UserLogin, ChangePasswordRequest
 
-
+# todo
+# try to put it in single line not all for file under services folder
 class AuthService:
 
     def __init__(self):
